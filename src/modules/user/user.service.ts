@@ -8,11 +8,13 @@ import { UserDto } from './user.dto';
 import { Model, Types } from 'mongoose';
 import { User } from './user.schema';
 import * as argon2 from 'argon2';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UserService {
   // private readonly user: UserDto
-  private readonly UserModel: Model<User>;
+  // private readonly UserModel: Model<User>;
+  constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
 
   async createUser(user: User): Promise<User> {
     const { password, ...data } = user;
@@ -40,7 +42,7 @@ export class UserService {
   }
 
   async getUsers(): Promise<User[]> {
-    const users = await this.UserModel.find();
+    const users = await this.UserModel.find().exec();
     return users;
   }
 
