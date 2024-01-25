@@ -22,11 +22,9 @@ export class AuthService {
     if (!password) throw new ApolloError('Invalid email or password');
 
     const user = await this.AuthModel.findOneUser(email);
-    this.logger.log(user, 'userrrr');
     if (!user) throw new ApolloError('Invalid email or password');
 
     const comparePassword = await argon2.verify(user.password, password);
-    this.logger.log(comparePassword, 'compare password');
     if (!comparePassword) throw new ApolloError('Invalid email or password');
 
     const token = await this.jwtService.signAsync({
