@@ -4,10 +4,12 @@ import { User, UserSchema } from './user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserResolver } from './user.resolver';
 
+const UserMongooseModule = MongooseModule.forFeature([
+  { name: User.name, schema: UserSchema },
+]);
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  ],
+  imports: [UserMongooseModule],
   providers: [UserService, UserResolver],
+  exports: [UserService, UserMongooseModule],
 })
 export class UserModule {}

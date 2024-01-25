@@ -40,13 +40,17 @@ export class UserService {
     return await this.UserModel.find();
   }
 
-  async findOneUser(id: string): Promise<User> {
+  async findUserById(id: string): Promise<User> {
     let userId;
     if (id) userId = new Types.ObjectId(id);
 
     const user = await this.UserModel.findById(userId);
 
     return user;
+  }
+
+  async findOneUser(email?: string): Promise<User> {
+    return this.UserModel.findOne({ email });
   }
 
   async deleteUser(id: string): Promise<boolean> {

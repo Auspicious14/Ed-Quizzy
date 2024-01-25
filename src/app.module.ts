@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './modules/user/user.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ApolloDriver } from '@nestjs/apollo';
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
