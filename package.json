@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "apollo-server-express": "^3.13.0",
     "argon2": "^0.31.2",
+    "class-validator": "^0.14.1",
     "graphql": "^16.8.1",
     "mongoose": "^8.1.0",
     "reflect-metadata": "^0.1.13",
