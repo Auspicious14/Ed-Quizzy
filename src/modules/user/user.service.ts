@@ -37,8 +37,7 @@ export class UserService {
   }
 
   async getUsers(): Promise<User[]> {
-    const users = await this.UserModel.find().exec();
-    return users;
+    return await this.UserModel.find();
   }
 
   async findOneUser(id: string): Promise<User> {
@@ -50,7 +49,11 @@ export class UserService {
     return user;
   }
 
-  async deleteUser(id: string): Promise<User> {
-    return await this.UserModel.findByIdAndDelete(id);
+  async deleteUser(id: string): Promise<boolean> {
+    let userId;
+    if (id) userId = new Types.ObjectId(id);
+
+    const user = await this.UserModel.findByIdAndDelete(userId);
+    if (user?._id == userId) return true;
   }
 }

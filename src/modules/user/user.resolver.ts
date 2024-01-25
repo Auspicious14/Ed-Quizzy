@@ -7,7 +7,7 @@ import { CreateUserInput, UpdateUserInput, UserDto } from './user.dto';
 export class UserResolver {
   constructor(private userService: UserService) {}
 
-  @Query((returns) => UserDto, { name: 'user' })
+  @Query((returns) => [UserDto], { name: 'getUsers' })
   async getUsers(): Promise<User[]> {
     return this.userService.getUsers();
   }
@@ -33,7 +33,7 @@ export class UserResolver {
     return this.userService.updateUser(id, updateUser as any);
   }
 
-  @Mutation((returns) => UserDto, { name: 'deleteUser' })
+  @Mutation((returns) => Boolean, { name: 'deleteUser', nullable: true })
   async deleteUser(@Args('id') id: string) {
     return this.userService.deleteUser(id);
   }
