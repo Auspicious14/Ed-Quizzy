@@ -5,16 +5,13 @@ import { UserModule } from '../user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../user/user.schema';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
+import { appConfig } from 'src/config/app.config';
 
 @Module({
   imports: [
     UserModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60 days' },
-    }),
+    JwtModule.registerAsync(appConfig().jwtSecret),
   ],
   providers: [AuthResolver, AuthService],
 })

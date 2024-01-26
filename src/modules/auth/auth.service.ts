@@ -31,7 +31,6 @@ export class AuthService {
       _id: user?._id,
       email: user?.email,
     });
-    this.logger.log(token, 'token');
     return {
       firstName: user?.firstName,
       lastName: user?.firstName,
