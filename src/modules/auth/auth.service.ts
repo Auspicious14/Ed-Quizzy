@@ -1,8 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../user/user.schema';
 import { Login } from './auth.dto';
-import { Model } from 'mongoose';
 import { ApolloError } from 'apollo-server-express';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';

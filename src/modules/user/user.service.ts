@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateUserInput, UpdateUserInput, UserDto } from './user.dto';
+import { CreateUserInput, UpdateUserInput } from './user.dto';
 import { Model, Types } from 'mongoose';
 import { User } from './user.schema';
 import * as argon2 from 'argon2';
@@ -7,8 +7,6 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UserService {
-  // private readonly user: UserDto
-  // private readonly UserModel: Model<User>;
   constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
 
   async createUser(user: CreateUserInput): Promise<User> {

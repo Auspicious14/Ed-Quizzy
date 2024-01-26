@@ -2,7 +2,7 @@ import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsEmail, IsOptional } from 'class-validator';
 
 @ObjectType()
-export class UserDto {
+export class User {
   @Field((type) => String, { nullable: true })
   _id: string;
   @Field()
