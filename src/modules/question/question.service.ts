@@ -18,7 +18,6 @@ export class QuestionService {
     const { question, courseId } = payload;
 
     const course = await this.courseService.getCourseById(courseId);
-    this.logger.log(course, 'cccoursee');
     if (!course) throw new ApolloError('Course does not exist');
 
     const existingQuestion = await this.questionModel.findOne({ question });
@@ -29,7 +28,7 @@ export class QuestionService {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-    this.logger.log(newQuestion);
+
     return await newQuestion.save();
   }
 
