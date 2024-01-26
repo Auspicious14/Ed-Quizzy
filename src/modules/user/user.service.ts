@@ -41,7 +41,7 @@ export class UserService {
   }
 
   async findUserById(id: string): Promise<User> {
-    let userId;
+    let userId: Types.ObjectId;
     if (id) userId = new Types.ObjectId(id);
 
     const user = await this.UserModel.findById(userId);
@@ -54,7 +54,7 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    let userId;
+    let userId: Types.ObjectId;
     if (id) userId = new Types.ObjectId(id);
 
     const user = await this.UserModel.findByIdAndDelete(userId);
