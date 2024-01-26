@@ -30,7 +30,7 @@ export class CourseService {
   async updateCourse(id: string, payload: UpdateCourseInput): Promise<Course> {
     let _id: Types.ObjectId;
 
-    if (!id || id == '') throw new ApolloError('Bad Input');
+    if (!id || id == '') throw new ApolloError('Bad User Input');
     _id = new Types.ObjectId(id);
 
     return await this.courseModel.findByIdAndUpdate(_id, payload, {
@@ -49,7 +49,8 @@ export class CourseService {
     _id = new Types.ObjectId(id);
 
     const course = await this.courseModel.findById(_id);
-    if (!course && course?.id !== _id)
+
+    if (!course || course?._id?.toString() !== _id.toString())
       throw new ApolloError('Course does not exist');
 
     return course;
@@ -62,7 +63,7 @@ export class CourseService {
     _id = new Types.ObjectId(id);
 
     const course = await this.courseModel.findByIdAndDelete(_id);
-    if (!course && course?._id !== _id)
+    if (!course || course?._id?.toString() !== _id.toString())
       throw new ApolloError('Cannot delete non-existing course');
 
     return true;

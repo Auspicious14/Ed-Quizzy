@@ -6,6 +6,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
 import { AuthModule } from './modules/auth/auth.module';
 import { CourseModule } from './modules/course/course.module';
+import { QuestionModule } from './modules/question/question.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CourseModule } from './modules/course/course.module';
     UserModule,
     AuthModule,
     CourseModule,
+    QuestionModule,
   ],
   controllers: [],
   providers: [],
