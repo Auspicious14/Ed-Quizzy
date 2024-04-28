@@ -7,6 +7,9 @@ import { ApolloDriver } from '@nestjs/apollo';
 import { AuthModule } from './modules/auth/auth.module';
 import { CourseModule } from './modules/course/course.module';
 import { QuestionModule } from './modules/question/question.module';
+import { LevelModule } from './modules/level/level.module';
+import { CloudinaryProvider } from './config/cloudinary.provider';
+import { QuizModule } from './modules/quiz/quiz.module';
 
 @Module({
   imports: [
@@ -22,9 +25,11 @@ import { QuestionModule } from './modules/question/question.module';
     UserModule,
     AuthModule,
     CourseModule,
+    QuizModule,
     QuestionModule,
+    LevelModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [CloudinaryProvider],
 })
 export class AppModule {}
