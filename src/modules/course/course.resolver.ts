@@ -40,4 +40,9 @@ export class CourseResolver {
   async getCourseById(@Args('id') id: string): Promise<Course> {
     return this.courseService.getCourseById(id);
   }
+
+  @Query((returns) => [CourseDto])
+  async getCoursesByLevel(@Args('levelId') levelId: string): Promise<Course[]> {
+    return this.courseService.getCoursesByLevelId(levelId);
+  }
 }

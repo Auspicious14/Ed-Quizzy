@@ -4,6 +4,7 @@ import { Course } from './course.schema';
 import { CreateCourseInput, UpdateCourseInput } from './course.dto';
 import { ApolloError } from 'apollo-server-express';
 import { InjectModel } from '@nestjs/mongoose';
+import { mapFiles } from 'src/utils/utils';
 
 @Injectable()
 export class CourseService {
@@ -11,15 +12,23 @@ export class CourseService {
   constructor(@InjectModel(Course.name) private courseModel: Model<Course>) {}
 
   async createCourse(payload: CreateCourseInput): Promise<Course> {
-    const { title, code } = payload;
+    const { title, code, level, levelId, images } = payload;
 
-    if (title == '' || code == '') throw new ApolloError('Bad User Input');
+    if (title == '' || code == '' || level == '' || levelId == '')
+      throw new ApolloError('Bad User Input');
 
-    const course = await this.courseModel.findOne({ title });
-    if (course) throw new ApolloError('Course already exists');
+    if (!levelId) throw new ApolloError('Add Level ID to create a new course');
+
+    const exisCourseTitle = await this.courseModel.findOne({ title });
+    if (exisCourseTitle) throw new ApolloError('Course title already exists');
+
+    const exisCourseCode = await this.courseModel.findOne({ code });
+    if (exisCourseCode) throw new ApolloError('Course code already exists');
+    const files = await mapFiles(images);
 
     const newCourse = new this.courseModel({
       ...payload,
+      images: files,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -28,14 +37,21 @@ export class CourseService {
   }
 
   async updateCourse(id: string, payload: UpdateCourseInput): Promise<Course> {
+    const { images, ...values } = payload;
     let _id: Types.ObjectId;
 
     if (!id || id == '') throw new ApolloError('Bad User Input');
     _id = new Types.ObjectId(id);
 
-    return await this.courseModel.findByIdAndUpdate(_id, payload, {
-      new: true,
-    });
+    const files = await mapFiles(images);
+
+    return await this.courseModel.findByIdAndUpdate(
+      _id,
+      { images: files, ...values },
+      {
+        new: true,
+      },
+    );
   }
 
   async getCourses(): Promise<Course[]> {
@@ -54,6 +70,10 @@ export class CourseService {
       throw new ApolloError('Course does not exist');
 
     return course;
+  }
+
+  async getCoursesByLevelId(levelId: string): Promise<Course[]> {
+    return await this.courseModel.find({ levelId });
   }
 
   async deleteCourse(id: string): Promise<Boolean> {
