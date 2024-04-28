@@ -5,6 +5,12 @@ import { Question } from './question.schema';
 import { CreateQuestionInput, UpdateQuestionInput } from './question.dto';
 import { ApolloError } from 'apollo-server-express';
 import { CourseService } from '../course/course.service';
+import { Quiz } from '../quiz/quiz.schema';
+import { QuizService } from '../quiz/quiz.service';
+import { generativeAI } from 'src/utils/utils';
+import { response } from 'express';
+import { parse } from 'path';
+import { title } from 'process';
 
 @Injectable()
 export class QuestionService {
@@ -12,12 +18,17 @@ export class QuestionService {
   constructor(
     @InjectModel(Question.name) private questionModel: Model<Question>,
     private courseService: CourseService,
+    private quizService: QuizService,
   ) {}
 
   async createQuestion(payload: CreateQuestionInput): Promise<Question> {
-    const { question, courseId } = payload;
+    const { question, quizId } = payload;
 
-    const course = await this.courseService.getCourseById(courseId);
+    const quiz = await this.quizService.getQuizById(quizId);
+    if (!quiz)
+      throw new ApolloError('Cannot create question: Quiz does not exist');
+
+    const course = await this.courseService.getCourseById(quiz.courseId);
     if (!course) throw new ApolloError('Course does not exist');
 
     const existingQuestion = await this.questionModel.findOne({ question });
@@ -25,6 +36,12 @@ export class QuestionService {
 
     const newQuestion = new this.questionModel({
       ...payload,
+      courseId: course?._id,
+      course: {
+        _id: course?._id,
+        title: course?.title,
+        level: course?.level,
+      },
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -64,6 +81,14 @@ export class QuestionService {
     return this.questionModel.find();
   }
 
+  async getQuestionByCourse(courseId: string): Promise<Question[]> {
+    return this.questionModel.find({ courseId });
+  }
+
+  async getQuestionByQuiz(quizId: string): Promise<Question[]> {
+    return this.questionModel.find({ quizId });
+  }
+
   async getQuestionById(id: string): Promise<Question> {
     let _id: Types.ObjectId;
 
@@ -75,5 +100,42 @@ export class QuestionService {
       throw new ApolloError('Question does not exist');
 
     return question;
+  }
+
+  async generateQuestions(payload: CreateQuestionInput): Promise<any[]> {
+    let { quizId } = payload;
+
+    const quiz = await this.quizService.getQuizById(quizId);
+
+    const course = await this.courseService.getCourseById(quiz.courseId);
+    if (!course) throw new ApolloError('Course does not exist');
+
+    if (!quiz) throw new ApolloError('Invalid Param');
+
+    const prompt = `Generate questions based on ${quiz?.name} 
+    Make sure you return a valid and structured JSON object 
+    as your response as an array of 
+    {question: "", options: [], answer: "" }. Generate 20 sets of questions`;
+
+    const data = await generativeAI(prompt);
+    const response = data.text();
+
+    const startIndex = response.indexOf('[');
+    const endIndex = response.lastIndexOf(']') + 1;
+    const modifiedResponse = response.substring(startIndex, endIndex);
+
+    const parsedQuestions = JSON.parse(modifiedResponse);
+    const mappedValues = parsedQuestions.map((q) => ({
+      ...q,
+      quizId,
+      courseId: course?._id,
+      course: {
+        _id: course?._id,
+        title: course?.title,
+        level: course?.level,
+      },
+    }));
+    const questions = await this.questionModel.insertMany(mappedValues);
+    return questions;
   }
 }

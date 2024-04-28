@@ -34,9 +34,28 @@ export class QuestionResolver {
     return this.questionService.deleteQuestion(id);
   }
 
+  @Mutation((returns) => [QuestionDto], { name: 'generateQuestions' })
+  async generateQuestions(
+    @Args('payload') payload: CreateQuestionInput,
+  ): Promise<Question[]> {
+    return this.questionService.generateQuestions(payload);
+  }
+
   @Query((returns) => [QuestionDto], { name: 'getQuestions' })
   async getQuestions(): Promise<Question[]> {
     return this.questionService.getQuestions();
+  }
+
+  @Query((returns) => [QuestionDto], { name: 'getQuestionByQuiz' })
+  async getQuestionByQuiz(@Args('quizId') quizId: string): Promise<Question[]> {
+    return this.questionService.getQuestionByQuiz(quizId);
+  }
+
+  @Query((returns) => [QuestionDto], { name: 'getQuestionByCourse' })
+  async getQuestionByCourse(
+    @Args('courseId') courseId: string,
+  ): Promise<Question[]> {
+    return this.questionService.getQuestionByCourse(courseId);
   }
 
   @Query((returns) => QuestionDto, { name: 'getQuestionById' })
