@@ -54,7 +54,7 @@ export class QuestionService {
 
     const question = await this.questionModel.findByIdAndDelete(_id);
 
-    if (!question || question._id.toString() != _id.toString())
+    if (!question || question._id.toString() !== _id.toString())
       throw new ApolloError('Cannot delete non-existing question');
 
     return true;

@@ -12,7 +12,7 @@ export class Login {
 export class Auth {
   @Field()
   userId: string;
-  @Field({ nullable: true })
+  @Field()
   firstName: string;
   @Field()
   lastName: string;
@@ -20,6 +20,4 @@ export class Auth {
   email: string;
   @Field()
   token: string;
-  @Field()
-  phoneNumber: string;
 }
