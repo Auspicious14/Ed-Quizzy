@@ -6,6 +6,7 @@ import { Question, QuestionSchema } from './question.schema';
 import { CourseService } from '../course/course.service';
 import { CourseModule } from '../course/course.module';
 import { QuizModule } from '../quiz/quiz.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { QuizModule } from '../quiz/quiz.module';
     ]),
     CourseModule,
     QuizModule,
+    // CacheModule.register(),
   ],
   providers: [QuestionResolver, QuestionService],
 })

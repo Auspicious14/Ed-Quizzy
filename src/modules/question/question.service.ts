@@ -1,24 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, UseInterceptors } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Question } from './question.schema';
 import { CreateQuestionInput, UpdateQuestionInput } from './question.dto';
 import { ApolloError } from 'apollo-server-express';
 import { CourseService } from '../course/course.service';
-import { Quiz } from '../quiz/quiz.schema';
 import { QuizService } from '../quiz/quiz.service';
 import { generativeAI } from 'src/utils/utils';
-import { response } from 'express';
-import { parse } from 'path';
-import { title } from 'process';
+import { CACHE_MANAGER, Cache, CacheInterceptor } from '@nestjs/cache-manager';
 
 @Injectable()
+@UseInterceptors(CacheInterceptor)
 export class QuestionService {
   private readonly logger = new Logger();
   constructor(
     @InjectModel(Question.name) private questionModel: Model<Question>,
     private courseService: CourseService,
     private quizService: QuizService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   async createQuestion(payload: CreateQuestionInput): Promise<Question> {
@@ -77,6 +76,15 @@ export class QuestionService {
     return true;
   }
 
+  async deleteQuestions(): Promise<Boolean> {
+    const question = await this.questionModel.deleteMany();
+
+    if (!question)
+      throw new ApolloError('Cannot delete non-existing questions');
+
+    return true;
+  }
+
   async getQuestions(): Promise<Question[]> {
     return this.questionModel.find();
   }
@@ -86,7 +94,17 @@ export class QuestionService {
   }
 
   async getQuestionByQuiz(quizId: string): Promise<Question[]> {
-    return this.questionModel.find({ quizId });
+    let questions: Array<Question> = [];
+    const cachedKey = `questions:${quizId}`;
+    const cachedData: Array<Question> = await this.cache.get(cachedKey);
+
+    if (!cachedData || cachedData == undefined) {
+      questions = await this.questionModel.find({ quizId });
+      await this.cache.set(cachedKey, questions, 30 * 60 * 60 * 1000);
+    } else {
+      questions = cachedData;
+    }
+    return questions;
   }
 
   async getQuestionById(id: string): Promise<Question> {
@@ -104,6 +122,7 @@ export class QuestionService {
 
   async generateQuestions(payload: CreateQuestionInput): Promise<any[]> {
     let { quizId } = payload;
+    const cachedKey = `questions:${quizId}`;
 
     const quiz = await this.quizService.getQuizById(quizId);
 
@@ -119,6 +138,7 @@ export class QuestionService {
 
     const data = await generativeAI(prompt);
     const response = data.text();
+    console.log(response, 'resss');
 
     const startIndex = response.indexOf('[');
     const endIndex = response.lastIndexOf(']') + 1;
@@ -136,6 +156,7 @@ export class QuestionService {
       },
     }));
     const questions = await this.questionModel.insertMany(mappedValues);
+
     return questions;
   }
 }

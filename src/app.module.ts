@@ -10,6 +10,9 @@ import { QuestionModule } from './modules/question/question.module';
 import { LevelModule } from './modules/level/level.module';
 import { CloudinaryProvider } from './config/cloudinary.provider';
 import { QuizModule } from './modules/quiz/quiz.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { QuestionService } from './modules/question/question.service';
+import { Question } from './modules/question/question.schema';
 
 @Module({
   imports: [
@@ -22,6 +25,10 @@ import { QuizModule } from './modules/quiz/quiz.module';
       useFactory: () => ({ uri: process.env.MONGODB_URL }),
     }),
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.registerAsync({
+      useFactory: () => ({ max: 20 }),
+      isGlobal: true,
+    }),
     UserModule,
     AuthModule,
     CourseModule,

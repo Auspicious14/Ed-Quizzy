@@ -34,6 +34,11 @@ export class QuestionResolver {
     return this.questionService.deleteQuestion(id);
   }
 
+  @Mutation((returns) => Boolean, { name: 'deleteAllQuestions' })
+  async deleteQuestions(): Promise<Boolean> {
+    return this.questionService.deleteQuestions();
+  }
+
   @Mutation((returns) => [QuestionDto], { name: 'generateQuestions' })
   async generateQuestions(
     @Args('payload') payload: CreateQuestionInput,
