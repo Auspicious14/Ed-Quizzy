@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Login } from './auth.dto';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Auth, Login } from './auth.dto';
 import { ApolloError } from 'apollo-server-express';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
+import { User } from '../user/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async Login(payload: Login): Promise<any> {
+  async Login(payload: Login): Promise<Auth> {
     const { email, password } = payload;
 
     if (!password) throw new ApolloError('Invalid email or password');
@@ -29,11 +30,23 @@ export class AuthService {
       email: user?.email,
     });
     return {
-      userId: user?._id,
+      userId: user?._id.toString(),
       firstName: user?.firstName,
       lastName: user?.firstName,
       email: user?.email,
       token,
     };
+  }
+
+  async validateUser(payload: any) {
+    const { email } = payload;
+
+    const user = await this.AuthModel.findOneUser(email);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return user;
   }
 }

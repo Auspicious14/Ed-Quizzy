@@ -14,5 +14,6 @@ import { appConfig } from 'src/config/app.config';
     JwtModule.registerAsync(appConfig().jwtSecret),
   ],
   providers: [AuthResolver, AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}

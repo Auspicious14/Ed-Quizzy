@@ -11,8 +11,9 @@ import { LevelModule } from './modules/level/level.module';
 import { CloudinaryProvider } from './config/cloudinary.provider';
 import { QuizModule } from './modules/quiz/quiz.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { QuestionService } from './modules/question/question.service';
-import { Question } from './modules/question/question.schema';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './modules/auth/guard/jwt.strategy';
 
 @Module({
   imports: [
@@ -29,6 +30,10 @@ import { Question } from './modules/question/question.schema';
       useFactory: () => ({ max: 20 }),
       isGlobal: true,
     }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+    }),
     UserModule,
     AuthModule,
     CourseModule,
@@ -37,6 +42,6 @@ import { Question } from './modules/question/question.schema';
     LevelModule,
   ],
   controllers: [],
-  providers: [CloudinaryProvider],
+  providers: [CloudinaryProvider, JwtStrategy],
 })
 export class AppModule {}

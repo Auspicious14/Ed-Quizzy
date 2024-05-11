@@ -1,4 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Types } from 'mongoose';
 
 @InputType()
 export class Login {
