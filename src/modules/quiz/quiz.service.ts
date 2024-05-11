@@ -1,4 +1,10 @@
-import { Injectable, Logger, UseGuards } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  Scope,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Quiz } from './quiz.schema';
@@ -10,6 +16,7 @@ import { generativeAI, mapFiles } from 'src/utils/utils';
 import { JwtAuthGuard } from '../auth/guard/guard';
 import { User } from '../user/user.schema';
 import { CurrentUser } from '../auth/guard/current.user';
+import { Course } from '../course/course.schema';
 
 @Injectable()
 export class QuizService {
@@ -115,10 +122,18 @@ export class QuizService {
     let payload;
 
     if (!user) {
-      throw new ApolloError('Unauthorized access. Please login first.');
+      throw new UnauthorizedException();
     }
 
-    const course = await this.courseService.getCourseById(courseId);
+    const quizes: Quiz[] = await this.quizModel.find({
+      userId: user?._id,
+      status: 'DRAFT',
+    });
+
+    if (quizes && quizes.find((q) => q.status === 'DRAFT'))
+      throw new ApolloError('Complete existing quiz');
+
+    const course: Course = await this.courseService.getCourseById(courseId);
     if (!course) throw new ApolloError('Course does not exist');
 
     const prompt = `create a quiz name, description that matches ${courseTitle}. 
@@ -140,6 +155,9 @@ export class QuizService {
       name: payload.name,
       description: payload.description,
       level: course?.level,
+      userId: user?._id,
+      status: 'DRAFT',
+      score: 0,
     });
     result.save();
 

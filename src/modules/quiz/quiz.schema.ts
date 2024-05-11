@@ -8,6 +8,8 @@ export class Quiz {
   @Prop()
   courseId: string;
   @Prop()
+  userId: string;
+  @Prop()
   name: string;
   @Prop()
   description: string;
