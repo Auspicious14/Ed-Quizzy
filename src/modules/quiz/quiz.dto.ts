@@ -12,10 +12,14 @@ export class Quiz {
   name: string;
   @Field()
   description: string;
-  @Field()
+  @Field({ nullable: true })
   timeLimit: string;
   @Field()
   level: string;
+  @Field()
+  status: 'COMPLETED' | 'DRAFT';
+  @Field()
+  score: number;
   @Field(() => [Image], { nullable: true })
   images: Array<Image>;
 }
@@ -42,6 +46,10 @@ export class UpdateQuizInput {
   description: string;
   @Field({ nullable: true })
   timeLimit: string;
+  @Field({ nullable: true })
+  status: 'COMPLETED' | 'DRAFT';
+  @Field({ nullable: true })
+  score: number;
   @Field(() => [File], { nullable: true })
   images: Array<File>;
 }

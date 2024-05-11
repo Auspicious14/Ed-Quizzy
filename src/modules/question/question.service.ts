@@ -129,7 +129,7 @@ export class QuestionService {
     const course = await this.courseService.getCourseById(quiz.courseId);
     if (!course) throw new ApolloError('Course does not exist');
 
-    if (!quiz) throw new ApolloError('Invalid Param');
+    if (!quiz) throw new ApolloError('Quiz does not exist');
 
     const prompt = `Generate questions based on ${quiz?.name} 
     Make sure you return a valid and structured JSON object 

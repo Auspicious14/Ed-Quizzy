@@ -14,6 +14,10 @@ export class Quiz {
   @Prop()
   timeLimit: string;
   @Prop()
+  status: 'COMPLETED' | 'DRAFT';
+  @Prop()
+  score: number;
+  @Prop()
   level: string;
   @Prop()
   createdAt: string;

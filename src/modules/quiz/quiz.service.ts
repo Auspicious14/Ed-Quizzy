@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Quiz } from './quiz.schema';
@@ -6,6 +6,10 @@ import { CreateQuizInput, UpdateQuizInput } from './quiz.dto';
 import { ApolloError } from 'apollo-server-express';
 import { CourseService } from '../course/course.service';
 import { generativeAI, mapFiles } from 'src/utils/utils';
+// import { CurrentUser } from '../auth/guard/auth.decorator';
+import { JwtAuthGuard } from '../auth/guard/guard';
+import { User } from '../user/user.schema';
+import { CurrentUser } from '../auth/guard/current.user';
 
 @Injectable()
 export class QuizService {
@@ -41,9 +45,9 @@ export class QuizService {
   }
 
   async updateQuiz(id: string, payload: UpdateQuizInput): Promise<Quiz> {
-    let files: Array<{}> = [{}];
     let _id: Types.ObjectId;
     const { images } = payload;
+    let files: Array<{}> = images;
 
     if (!id || id == '') throw new ApolloError('Bad User Input');
     _id = new Types.ObjectId(id);
@@ -67,11 +71,17 @@ export class QuizService {
     if (!id || id == '') throw new ApolloError('Bad User Input');
     _id = new Types.ObjectId(id);
 
-    const question = await this.quizModel.findByIdAndDelete(_id);
+    const quiz = await this.quizModel.findByIdAndDelete(_id);
 
-    if (!question || question._id.toString() !== _id.toString())
+    if (!quiz || quiz._id.toString() !== _id.toString())
       throw new ApolloError('Cannot delete non-existing question');
 
+    return true;
+  }
+
+  async deleteAllQuiz(): Promise<Boolean> {
+    const quiz = await this.quizModel.deleteMany();
+    if (!quiz) throw new ApolloError('Cannot delete non-existing quiz');
     return true;
   }
 
@@ -96,17 +106,31 @@ export class QuizService {
     return question;
   }
 
-  async generateQuiz(courseTitle: string, courseId: string): Promise<Quiz> {
+  @UseGuards(JwtAuthGuard)
+  async generateQuiz(
+    @CurrentUser() user: User,
+    courseTitle: string,
+    courseId: string,
+  ): Promise<Quiz> {
     let payload;
+
+    if (!user) {
+      throw new ApolloError('Unauthorized access. Please login first.');
+    }
+
     const course = await this.courseService.getCourseById(courseId);
     if (!course) throw new ApolloError('Course does not exist');
 
-    const prompt = `create a quiz name, description that matches ${courseTitle}. Make sure you return a valid and structured JSOON object of name and description as your response {name: "", description: ""}.`;
+    const prompt = `create a quiz name, description that matches ${courseTitle}. 
+    Make sure you return a valid and structured JSON object of name, description as your response 
+    {name: "", description: ""}. `;
+
     const data = await generativeAI(prompt);
     const response = data.text();
+    // console.log(response, 'resss');
 
     const startIndex = response.indexOf('{');
-    const endIndex = response.indexOf('}') + 1;
+    const endIndex = response.lastIndexOf('}') + 1;
     const modifiedResponse = response.substring(startIndex, endIndex);
 
     payload = JSON.parse(modifiedResponse);
@@ -115,6 +139,7 @@ export class QuizService {
       courseId,
       name: payload.name,
       description: payload.description,
+      level: course?.level,
     });
     result.save();
 
