@@ -14,6 +14,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './modules/auth/guard/jwt.strategy';
+import { ResourceModule } from './modules/resource/resource.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { JwtStrategy } from './modules/auth/guard/jwt.strategy';
     QuizModule,
     QuestionModule,
     LevelModule,
+    ResourceModule,
   ],
   controllers: [],
   providers: [CloudinaryProvider, JwtStrategy],

@@ -1,7 +1,6 @@
 import {
   Injectable,
   Logger,
-  Scope,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -12,7 +11,6 @@ import { CreateQuizInput, UpdateQuizInput } from './quiz.dto';
 import { ApolloError } from 'apollo-server-express';
 import { CourseService } from '../course/course.service';
 import { generativeAI, mapFiles } from 'src/utils/utils';
-// import { CurrentUser } from '../auth/guard/auth.decorator';
 import { JwtAuthGuard } from '../auth/guard/guard';
 import { User } from '../user/user.schema';
 import { CurrentUser } from '../auth/guard/current.user';
@@ -121,9 +119,7 @@ export class QuizService {
   ): Promise<Quiz> {
     let payload;
 
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    if (!user) throw new UnauthorizedException();
 
     const quizes: Quiz[] = await this.quizModel.find({
       userId: user?._id,

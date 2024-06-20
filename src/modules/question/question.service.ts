@@ -122,7 +122,6 @@ export class QuestionService {
 
   async generateQuestions(payload: CreateQuestionInput): Promise<any[]> {
     let { quizId } = payload;
-    const cachedKey = `questions:${quizId}`;
 
     const quiz = await this.quizService.getQuizById(quizId);
 
@@ -138,7 +137,6 @@ export class QuestionService {
 
     const data = await generativeAI(prompt);
     const response = data.text();
-    console.log(response, 'resss');
 
     const startIndex = response.indexOf('[');
     const endIndex = response.lastIndexOf(']') + 1;
